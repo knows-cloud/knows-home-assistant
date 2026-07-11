@@ -1,0 +1,8 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Run the Authelia admin UI (served via Home Assistant ingress)
+# ==============================================================================
+export PYTHONUNBUFFERED=1
+
+bashio::log.info "Starting Authelia admin UI on port 8099..."
+exec python3 /opt/admin-ui/app.py

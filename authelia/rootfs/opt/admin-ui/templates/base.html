@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Authelia Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <div class="brand">🛡️ Authelia Admin</div>
+  <nav>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('settings') }}">Settings</a>
+    <a href="{{ url_for('users') }}">Users</a>
+    <a href="{{ url_for('access') }}">Access Control</a>
+    <a href="{{ url_for('branding') }}">Branding</a>
+    <a href="{{ url_for('editor') }}">YAML Editor</a>
+  </nav>
+</header>
+
+{% if restart_needed %}
+<div class="banner">
+  <span>Configuration has changed — restart Authelia to apply.</span>
+  <form method="post" action="{{ url_for('restart') }}">
+    <button type="submit" class="btn btn-warn">Restart Authelia</button>
+  </form>
+</div>
+{% endif %}
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

@@ -1,0 +1,10 @@
+build_from:
+  amd64: ghcr.io/home-assistant/amd64-base:3.21
+  aarch64: ghcr.io/home-assistant/aarch64-base:3.21
+  armv7: ghcr.io/home-assistant/armv7-base:3.21
+labels:
+  org.opencontainers.image.title: Better Authelia
+  org.opencontainers.image.description: Authelia with an admin UI for Home Assistant
+  org.opencontainers.image.source: https://github.com/martintrost/ha-better-authelia
+args:
+  AUTHELIA_VERSION: 4.39.4

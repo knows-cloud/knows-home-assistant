@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="cards">
+  <div class="card">
+    <h3>Status</h3>
+    <p class="status status-{{ status }}">{{ status }}</p>
+    <p class="muted">Authelia {{ version }}</p>
+  </div>
+  <div class="card">
+    <h3>Domain</h3>
+    <p>{{ domain }}</p>
+    <p class="muted">Portal: {{ portal_url }}</p>
+  </div>
+  <div class="card">
+    <h3>Users</h3>
+    <p>{{ user_count }}</p>
+  </div>
+  <div class="card">
+    <h3>Access rules</h3>
+    <p>{{ rule_count }}</p>
+    <p class="muted">Default policy: {{ default_policy }}</p>
+  </div>
+  <div class="card">
+    <h3>Theme</h3>
+    <p>{{ theme }}</p>
+  </div>
+</div>
+
+<div class="actions">
+  <form method="post" action="{{ url_for('restart') }}">
+    <button type="submit" class="btn btn-warn">Restart Authelia</button>
+  </form>
+  <form method="post" action="{{ url_for('validate') }}">
+    <button type="submit" class="btn">Validate configuration</button>
+  </form>
+</div>
+
+<h2>Getting started</h2>
+<ol class="help">
+  <li>Set your <a href="{{ url_for('settings') }}">domain and portal URL</a>.</li>
+  <li>Create <a href="{{ url_for('users') }}">users</a> and assign groups.</li>
+  <li>Define <a href="{{ url_for('access') }}">access control rules</a> per subdomain.</li>
+  <li>Point your reverse proxy (NPM, Traefik, Caddy…) at port <code>9091</code> of this addon.</li>
+  <li>Personalize the portal under <a href="{{ url_for('branding') }}">Branding</a>.</li>
+</ol>
+{% endblock %}

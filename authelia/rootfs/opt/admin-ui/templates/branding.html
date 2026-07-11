@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Branding</h1>
+<p class="muted">Personalize the look and feel of the Authelia login portal your users see.</p>
+
+<form method="post" enctype="multipart/form-data" class="form">
+  <h2>Color theme</h2>
+  <div class="theme-picker">
+    {% for t in themes %}
+    <label class="theme-option theme-{{ t }}">
+      <input type="radio" name="theme" value="{{ t }}" {% if t == theme %}checked{% endif %}>
+      <span>{{ t }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  <small><code>auto</code> follows the visitor's system light/dark preference.</small>
+
+  <h2>Logo</h2>
+  <p class="muted">
+    {% if has_logo %}A custom logo is active.{% else %}Using the default Authelia logo.{% endif %}
+    Upload a transparent PNG; Authelia resizes it automatically.
+  </p>
+  <label>Portal logo (PNG)
+    <input type="file" name="logo" accept=".png,image/png">
+  </label>
+
+  <h2>Favicon</h2>
+  <p class="muted">
+    {% if has_favicon %}A custom favicon is active.{% else %}Using the default Authelia favicon.{% endif %}
+  </p>
+  <label>Favicon (ICO)
+    <input type="file" name="favicon" accept=".ico,image/x-icon">
+  </label>
+
+  <button type="submit" class="btn btn-primary">Save branding</button>
+</form>
+
+<div class="actions">
+  {% if has_logo %}
+  <form method="post" action="{{ url_for('branding_reset', asset='logo') }}">
+    <button type="submit" class="btn btn-danger">Remove custom logo</button>
+  </form>
+  {% endif %}
+  {% if has_favicon %}
+  <form method="post" action="{{ url_for('branding_reset', asset='favicon') }}">
+    <button type="submit" class="btn btn-danger">Remove custom favicon</button>
+  </form>
+  {% endif %}
+</div>
+
+<h2>Going further</h2>
+<p class="help">
+  Portal texts (titles, button labels) can be customized per language by placing
+  locale overrides in <code>/addon_configs/…/assets/locales/&lt;lang&gt;/portal.json</code> —
+  see the <a href="https://www.authelia.com/reference/guides/server-asset-overrides/" target="_blank" rel="noopener">Authelia asset overrides guide</a>.
+</p>
+{% endblock %}

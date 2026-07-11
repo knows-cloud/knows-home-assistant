@@ -1,0 +1,10 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Run the Authelia server
+# ==============================================================================
+export AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=/config/secrets/jwt_secret
+export AUTHELIA_SESSION_SECRET_FILE=/config/secrets/session_secret
+export AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/config/secrets/storage_encryption_key
+
+bashio::log.info "Starting Authelia..."
+exec authelia --config /config/configuration.yml

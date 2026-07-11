@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>YAML Editor</h1>
+<p class="muted">
+  Full configuration for advanced tweaks the forms don't cover (OIDC provider, LDAP backend,
+  SMTP notifier…). Saves are validated with <code>authelia validate-config</code> first;
+  the previous version is kept as <code>configuration.yml.bak</code>.
+</p>
+
+<form method="post" class="form">
+  <textarea name="content" rows="30" spellcheck="false">{{ content }}</textarea>
+  <button type="submit" class="btn btn-primary">Validate &amp; save</button>
+</form>
+{% endblock %}

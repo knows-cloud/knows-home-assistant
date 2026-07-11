@@ -1,0 +1,10 @@
+configuration:
+  domain:
+    name: Domain
+    description: >-
+      Root domain used to seed the initial Authelia configuration (first start only).
+      Afterwards, manage the domain in the admin UI.
+  log_level:
+    name: Log level
+    description: >-
+      Log level used to seed the initial Authelia configuration (first start only).

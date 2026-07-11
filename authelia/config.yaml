@@ -1,0 +1,28 @@
+name: Better Authelia
+version: 1.0.0
+slug: better_authelia
+description: Authelia SSO server with a full admin UI for settings, users, access control and branding
+url: https://github.com/martintrost/ha-better-authelia
+arch:
+  - amd64
+  - aarch64
+  - armv7
+init: false
+startup: services
+boot: auto
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:shield-key
+panel_title: Authelia
+ports:
+  9091/tcp: 9091
+ports_description:
+  9091/tcp: Authelia portal (point your reverse proxy at this port)
+map:
+  - addon_config:rw
+options:
+  domain: example.com
+  log_level: info
+schema:
+  domain: str
+  log_level: list(debug|info|warn|error)
