@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+- Fixed the image build failing with "can't rename '/tmp/authelia/authelia-linux-…'":
+  Authelia release tarballs newer than 4.39.4 ship the binary as plain `authelia`.
+
 ## 1.1.0
 
 - Updated Authelia to 4.39.20.
