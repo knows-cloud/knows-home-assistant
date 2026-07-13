@@ -2,6 +2,8 @@
 
 ## 1.1.0
 
+- Updated Authelia to 4.39.20.
+
 - **New Home Assistant style UI**: Material design with app bar, tabs, cards,
   settings rows, switches and automatic dark mode. Every setting now has a
   plain-language description written for home admins, not Authelia experts.

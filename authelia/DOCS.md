@@ -82,7 +82,7 @@ config is not supported — terminate TLS at your reverse proxy.
 
 The default configuration uses the **filesystem notifier**: password-reset and identity
 verification links are written to `/addon_configs/…/notification.txt` instead of being
-emailed. For real email delivery, configure an SMTP notifier in the YAML editor.
+emailed. For real email delivery, switch to SMTP on the **Notifications** page.
 
 ## Addon options
 
