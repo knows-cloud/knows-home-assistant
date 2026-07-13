@@ -54,9 +54,9 @@
      client.public if editing else False) }}
 {% endcall %}
 
-<div class="card-actions page-actions">
-  <a href="{{ url_for('oidc.index') }}" class="btn">Cancel</a>
-  <button type="submit" class="btn btn-primary">{{ 'Save changes' if editing else 'Create client' }}</button>
+<div class="page-actions">
+  <a href="{{ url_for('oidc.index') }}" class="btn btn-outlined">Cancel</a>
+  <button type="submit" class="btn btn-contained">{{ 'Save changes' if editing else 'Create client' }}</button>
 </div>
 </form>
 {% endblock %}

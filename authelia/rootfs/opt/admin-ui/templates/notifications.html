@@ -6,15 +6,10 @@
 
 <form method="post">
 {% call card('Delivery method') %}
-  <div class="row">
-    <div class="row-text">
-      <label>Method</label>
-      <p class="desc">"File on the server" writes messages to <code>/config/notification.txt</code> — fine for testing, but users never see them. Set up email so password resets actually reach the family.</p>
-    </div>
-    <div class="row-control radio-stack">
-      <label><input type="radio" name="mode" value="filesystem" {% if mode == 'filesystem' %}checked{% endif %}> File on the server</label>
-      <label><input type="radio" name="mode" value="smtp" {% if mode == 'smtp' %}checked{% endif %}> Email (SMTP)</label>
-    </div>
+  <p class="helper span-all">"File on the server" writes messages to <code class="inline-code">/config/notification.txt</code> — fine for testing, but users never see them. Set up email so password resets actually reach the family.</p>
+  <div class="radio-stack span-all">
+    <label><input type="radio" name="mode" value="filesystem" {% if mode == 'filesystem' %}checked{% endif %}> File on the server</label>
+    <label><input type="radio" name="mode" value="smtp" {% if mode == 'smtp' %}checked{% endif %}> Email (SMTP)</label>
   </div>
 {% endcall %}
 

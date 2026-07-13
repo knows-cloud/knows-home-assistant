@@ -63,17 +63,17 @@ app.register_blueprint(views_branding.bp)
 app.register_blueprint(views_advanced.bp)
 
 NAV = [
-    ("dashboard", "Overview"),
-    ("settings.general", "General"),
-    ("settings.session", "Session"),
-    ("settings.security", "Security"),
-    ("settings.twofactor", "Two-Factor"),
-    ("users.index", "Users"),
-    ("access.index", "Access"),
-    ("oidc.index", "SSO Clients"),
-    ("settings.notifications", "Notifications"),
-    ("branding.index", "Branding"),
-    ("advanced.editor", "Advanced"),
+    ("dashboard", "Overview", "home"),
+    ("settings.general", "General", "tune"),
+    ("settings.session", "Session", "clock"),
+    ("settings.security", "Security", "shield"),
+    ("settings.twofactor", "Two-Factor", "key"),
+    ("users.index", "Users", "people"),
+    ("access.index", "Access", "lock"),
+    ("oidc.index", "SSO Clients", "puzzle"),
+    ("settings.notifications", "Notifications", "email"),
+    ("branding.index", "Branding", "palette"),
+    ("advanced.editor", "Advanced", "code"),
 ]
 
 

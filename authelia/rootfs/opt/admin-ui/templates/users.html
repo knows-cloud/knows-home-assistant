@@ -2,18 +2,21 @@
 {% from "macros.html" import card, text_field, save_button %}
 {% block content %}
 <h1>Users</h1>
-<p class="page-desc">Everyone who can sign in through Authelia. Groups are just labels (like <code>admins</code> or <code>kids</code>) that you can reference in access rules.</p>
+<p class="page-desc">Everyone who can sign in through Authelia. Groups are just labels (like <code class="inline-code">admins</code> or <code class="inline-code">kids</code>) that you can reference in access rules and app role mappings.</p>
 
-{% for username, user in users.items() %}
-<section class="card user-card{% if user.disabled %} is-disabled{% endif %}">
-  <header class="card-header user-header">
-    <div>
-      <h2>{{ user.displayname or username }} <span class="chip">{{ username }}</span>
+{% call card('Accounts') %}
+<div class="list span-all">
+  {% for username, user in users.items() %}
+  <div class="list-item{% if user.disabled %} is-disabled{% endif %}">
+    <span class="avatar">{{ (user.displayname or username)[:1] }}</span>
+    <div class="list-body">
+      <div class="list-title">{{ user.displayname or username }}
+        <span class="chip">{{ username }}</span>
         {% if user.disabled %}<span class="chip chip-warn">disabled</span>{% endif %}
-      </h2>
-      <p>{{ user.email or 'no email set' }}{% if user.groups %} · groups: {{ user.groups | join(', ') }}{% endif %}</p>
+      </div>
+      <div class="list-sub">{{ user.email or 'no email set' }}{% if user.groups %} · {{ user.groups | join(', ') }}{% endif %}</div>
     </div>
-    <div class="user-actions">
+    <div class="list-actions">
       <form method="post" action="{{ url_for('users.toggle', username=username) }}">
         <button type="submit" class="btn btn-small">{{ 'Enable' if user.disabled else 'Disable' }}</button>
       </form>
@@ -22,22 +25,25 @@
         <button type="submit" class="btn btn-small btn-danger">Delete</button>
       </form>
     </div>
-  </header>
-  <details class="card-body details">
-    <summary>Edit profile & password</summary>
-    <form method="post" action="{{ url_for('users.edit', username=username) }}">
-      {{ text_field('displayname', 'Display name', 'Shown on the login portal and sent to apps.', value=user.displayname or '') }}
-      {{ text_field('email', 'Email', 'Used for password reset links and passed to apps that ask for it.', value=user.email or '', type='email') }}
-      {{ text_field('groups', 'Groups', 'Comma separated, e.g. "admins, family". Access rules and app role mappings can refer to these.', value=user.groups | join(', ') if user.groups else '') }}
-      {{ save_button('Save profile') }}
-    </form>
-    <form method="post" action="{{ url_for('users.password', username=username) }}">
-      {{ text_field('password', 'New password', 'At least 8 characters. It is stored securely hashed - you cannot look it up later.', type='password') }}
-      {{ save_button('Change password') }}
-    </form>
-  </details>
-</section>
-{% endfor %}
+    <details class="details">
+      <summary>Edit profile & password</summary>
+      <div class="inner">
+        <form method="post" action="{{ url_for('users.edit', username=username) }}">
+          {{ text_field('displayname', 'Display name', 'Shown on the login portal and sent to apps.', value=user.displayname or '') }}
+          {{ text_field('email', 'Email', 'Used for password reset links and passed to apps that ask for it.', value=user.email or '', type='email') }}
+          {{ text_field('groups', 'Groups', 'Comma separated, e.g. "admins, family".', value=user.groups | join(', ') if user.groups else '') }}
+          {{ save_button('Save profile') }}
+        </form>
+        <form method="post" action="{{ url_for('users.password', username=username) }}">
+          {{ text_field('password', 'New password', 'At least 8 characters. Stored securely hashed - it cannot be looked up later.', type='password') }}
+          {{ save_button('Change password') }}
+        </form>
+      </div>
+    </details>
+  </div>
+  {% endfor %}
+</div>
+{% endcall %}
 
 {% call card('Add user', 'Create an account for a family member.') %}
 <form method="post" action="{{ url_for('users.add') }}">

@@ -12,10 +12,10 @@
   </div>
   <div class="hero-actions">
     <form method="post" action="{{ url_for('validate') }}">
-      <button type="submit" class="btn">Check configuration</button>
+      <button type="submit" class="btn btn-outlined">Check configuration</button>
     </form>
     <form method="post" action="{{ url_for('restart') }}">
-      <button type="submit" class="btn btn-primary">Restart Authelia</button>
+      <button type="submit" class="btn btn-contained">Restart Authelia</button>
     </form>
   </div>
 </section>
@@ -44,7 +44,7 @@
 </div>
 
 {% call card('Getting started', 'The typical order of setup for a home network.') %}
-  <ol class="steps">
+  <ol class="steps span-all">
     <li><a href="{{ url_for('settings.general') }}">General</a> — set your domain and the address of the login portal.</li>
     <li><a href="{{ url_for('users.index') }}">Users</a> — create an account for each family member.</li>
     <li><a href="{{ url_for('access.index') }}">Access</a> — decide which apps need a password, which need two-factor, and which are open.</li>

@@ -6,8 +6,13 @@
 
 {% call card('configuration.yml') %}
 <form method="post">
-  <textarea name="content" rows="28" class="code" spellcheck="false">{{ content }}</textarea>
-  <p class="desc">A backup of the previous version is kept at <code>configuration.yml.bak</code>. Secrets (session, storage, JWT) live in <code>/config/secrets/</code> and are injected automatically — don't add them here.</p>
+  <div class="tf span-all">
+    <div class="tf-outline">
+      <label for="f-content">configuration.yml</label>
+      <textarea id="f-content" name="content" rows="28" class="code" spellcheck="false">{{ content }}</textarea>
+    </div>
+    <p class="helper">A backup of the previous version is kept at <code class="inline-code">configuration.yml.bak</code>. Secrets (session, storage, JWT) live in <code class="inline-code">/config/secrets/</code> and are injected automatically — don't add them here.</p>
+  </div>
   {{ save_button('Validate & save') }}
 </form>
 {% endcall %}

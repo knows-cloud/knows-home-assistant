@@ -23,23 +23,23 @@
 
 {% call card('Rules', 'Evaluated top to bottom. Use the arrows to reorder — put specific rules above general ones.') %}
 {% if rules %}
-<div class="rule-list">
+<div class="list span-all">
   {% for rule in rules %}
-  <div class="rule">
-    <div class="rule-order">
-      <span class="rule-index">{{ loop.index }}</span>
+  <div class="list-item">
+    <div class="order-controls">
       <form method="post" action="{{ url_for('access.move', index=loop.index0) }}">
         <input type="hidden" name="direction" value="up">
-        <button class="btn btn-icon" {% if loop.first %}disabled{% endif %} title="Move up">▲</button>
+        <button class="btn" {% if loop.first %}disabled{% endif %} title="Move up">▲</button>
       </form>
+      <span class="order-index">{{ loop.index }}</span>
       <form method="post" action="{{ url_for('access.move', index=loop.index0) }}">
         <input type="hidden" name="direction" value="down">
-        <button class="btn btn-icon" {% if loop.last %}disabled{% endif %} title="Move down">▼</button>
+        <button class="btn" {% if loop.last %}disabled{% endif %} title="Move down">▼</button>
       </form>
     </div>
-    <div class="rule-body">
-      <div class="rule-domains">{{ rule.domain | join(', ') if rule.domain is iterable and rule.domain is not string else rule.domain }}</div>
-      <div class="desc">
+    <div class="list-body">
+      <div class="list-title">{{ rule.domain | join(', ') if rule.domain is iterable and rule.domain is not string else rule.domain }}</div>
+      <div class="list-sub">
         {% if rule.subject %}only for: {{ rule.subject | join(', ') }}{% endif %}
         {% if rule.resources %}{% if rule.subject %} · {% endif %}paths: {{ rule.resources | join(', ') }}{% endif %}
         {% if not rule.subject and not rule.resources %}for everyone, all paths{% endif %}
@@ -54,7 +54,7 @@
   {% endfor %}
 </div>
 {% else %}
-<p class="desc">No rules yet — every app currently uses the default policy.</p>
+<p class="helper span-all">No rules yet — every app currently uses the default policy.</p>
 {% endif %}
 {% endcall %}
 
