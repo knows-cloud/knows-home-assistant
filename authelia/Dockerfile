@@ -22,7 +22,7 @@ RUN apk add --no-cache \
         "https://github.com/authelia/authelia/releases/download/v${AUTHELIA_VERSION}/authelia-v${AUTHELIA_VERSION}-linux-${AUTHELIA_ARCH}-musl.tar.gz" \
     && mkdir -p /tmp/authelia \
     && tar -xzf /tmp/authelia.tar.gz -C /tmp/authelia \
-    && mv "/tmp/authelia/authelia-linux-${AUTHELIA_ARCH}-musl" /usr/local/bin/authelia \
+    && mv /tmp/authelia/authelia /usr/local/bin/authelia \
     && chmod +x /usr/local/bin/authelia \
     && rm -rf /tmp/authelia /tmp/authelia.tar.gz
 
