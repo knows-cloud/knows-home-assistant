@@ -5,6 +5,6 @@ build_from:
 labels:
   org.opencontainers.image.title: Better Authelia
   org.opencontainers.image.description: Authelia with an admin UI for Home Assistant
-  org.opencontainers.image.source: https://github.com/martintrost/ha-better-authelia
+  org.opencontainers.image.source: https://github.com/knows-cloud/ha-better-authelia
 args:
   AUTHELIA_VERSION: 4.39.4

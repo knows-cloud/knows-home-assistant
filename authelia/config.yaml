@@ -2,7 +2,7 @@ name: Better Authelia
 version: 1.0.0
 slug: better_authelia
 description: Authelia SSO server with a full admin UI for settings, users, access control and branding
-url: https://github.com/martintrost/ha-better-authelia
+url: https://github.com/knows-cloud/ha-better-authelia
 arch:
   - amd64
   - aarch64
