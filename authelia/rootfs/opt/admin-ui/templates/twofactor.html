@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, select_field, toggle, save_button %}
+{% block content %}
+<h1>Two-Factor</h1>
+<p class="page-desc">Second login step for apps you protect with the <em>two_factor</em> policy. Users enroll their own device the first time such an app asks for it.</p>
+
+<form method="post">
+{% call card('Authenticator app (TOTP)', 'Six-digit codes from apps like Google Authenticator, Aegis or 1Password.') %}
+  {{ toggle('totp_enabled', 'Enable one-time codes',
+     'Lets users register an authenticator app as their second factor.',
+     totp_enabled) }}
+  {{ text_field('totp_issuer', 'Issuer name',
+     'The name shown next to the code in the authenticator app, so the family knows what it belongs to. Your domain is a good choice.',
+     value=totp_issuer, placeholder='example.com') }}
+  {{ select_field('totp_algorithm', 'Algorithm',
+     'Keep SHA1 unless you know all your authenticator apps support more. Google Authenticator only works with SHA1.',
+     [('SHA1', 'SHA1 (compatible with everything — recommended)'), ('SHA256', 'SHA256'), ('SHA512', 'SHA512')],
+     totp_algorithm) }}
+  {{ select_field('totp_digits', 'Code length',
+     '6 digits is the standard every app supports. 8 is slightly more secure but some apps cannot handle it.',
+     [(6, '6 digits (recommended)'), (8, '8 digits')], totp_digits) }}
+  {{ text_field('totp_period', 'Code lifetime (seconds)',
+     'How long each code is valid. 30 seconds is the standard — only change this if you have a specific reason.',
+     value=totp_period, type='number') }}
+{% endcall %}
+
+{% call card('Security keys & passkeys (WebAuthn)', 'Hardware keys like YubiKey, or the fingerprint/Face ID prompt built into phones and laptops.') %}
+  {{ toggle('webauthn_enabled', 'Enable security keys',
+     'Lets users register a hardware key or platform passkey as their second factor.',
+     webauthn_enabled) }}
+  {{ text_field('webauthn_display_name', 'Prompt name',
+     'The name shown in the browser dialog when a key is registered or used.',
+     value=webauthn_display_name, placeholder='Authelia') }}
+  {{ select_field('webauthn_user_verification', 'Require PIN / fingerprint on the key',
+     '"preferred" asks for it when the key supports it. "required" always demands it (most secure, but old keys without a PIN stop working). "discouraged" never asks.',
+     [('preferred', 'preferred (recommended)'), ('required', 'required'), ('discouraged', 'discouraged')],
+     webauthn_user_verification) }}
+{% endcall %}
+{{ save_button() }}
+</form>
+{% endblock %}

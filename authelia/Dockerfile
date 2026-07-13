@@ -2,7 +2,7 @@ ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 ARG BUILD_ARCH
-ARG AUTHELIA_VERSION=4.39.4
+ARG AUTHELIA_VERSION=4.39.20
 
 # Runtime dependencies: Authelia binary + Python for the admin UI
 RUN apk add --no-cache \
@@ -11,6 +11,7 @@ RUN apk add --no-cache \
         py3-yaml \
         curl \
         openssl \
+        nginx \
     && case "${BUILD_ARCH}" in \
          amd64)   AUTHELIA_ARCH="amd64" ;; \
          aarch64) AUTHELIA_ARCH="arm64" ;; \
@@ -29,7 +30,8 @@ COPY rootfs /
 
 RUN chmod +x /etc/s6-overlay/s6-rc.d/init-authelia/up.sh \
              /etc/s6-overlay/s6-rc.d/authelia/run \
-             /etc/s6-overlay/s6-rc.d/admin-ui/run
+             /etc/s6-overlay/s6-rc.d/admin-ui/run \
+             /etc/s6-overlay/s6-rc.d/nginx/run
 
 HEALTHCHECK --interval=60s --timeout=10s --start-period=30s \
     CMD curl -fs http://127.0.0.1:9091/api/health || exit 1

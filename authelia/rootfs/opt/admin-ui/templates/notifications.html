@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, toggle, save_button %}
+{% block content %}
+<h1>Notifications</h1>
+<p class="page-desc">How Authelia delivers password-reset links and security notices to your users.</p>
+
+<form method="post">
+{% call card('Delivery method') %}
+  <p class="helper span-all">"File on the server" writes messages to <code class="inline-code">/config/notification.txt</code> — fine for testing, but users never see them. Set up email so password resets actually reach the family.</p>
+  <div class="radio-stack span-all">
+    <label><input type="radio" name="mode" value="filesystem" {% if mode == 'filesystem' %}checked{% endif %}> File on the server</label>
+    <label><input type="radio" name="mode" value="smtp" {% if mode == 'smtp' %}checked{% endif %}> Email (SMTP)</label>
+  </div>
+{% endcall %}
+
+{% call card('Email settings', 'Only used when the method above is Email. Works with any mail provider; for Gmail use an app password.') %}
+  {{ text_field('smtp_host', 'SMTP server', 'Your mail provider\'s outgoing server, e.g. smtp.gmail.com.', value=smtp_host) }}
+  {{ text_field('smtp_port', 'Port', '587 is the standard submission port with STARTTLS.', value=smtp_port, type='number') }}
+  {{ text_field('smtp_sender', 'Sender', 'The From address of the emails, e.g. "Authelia <auth@example.com>".', value=smtp_sender) }}
+  {{ text_field('smtp_username', 'Username', 'Login for the mail server. Often the full email address.', value=smtp_username) }}
+  {{ text_field('smtp_password', 'Password', 'Login password for the mail server. ' + ('A password is stored — leave empty to keep it.' if has_password else ''), type='password') }}
+  {{ toggle('disable_require_tls', 'Allow unencrypted connection',
+     'Only for mail servers on your own network that have no TLS. Never enable this for internet mail providers.',
+     disable_require_tls) }}
+{% endcall %}
+{{ save_button() }}
+</form>
+{% endblock %}

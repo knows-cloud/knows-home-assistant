@@ -1,0 +1,71 @@
+{# MUI-style form building blocks (outlined fields, floating labels,
+   helper text below the control). #}
+
+{% macro card(title, desc='') %}
+<section class="card">
+  <header class="card-header">
+    <h2>{{ title }}</h2>
+    {% if desc %}<p class="card-subheader">{{ desc }}</p>{% endif %}
+  </header>
+  <div class="card-body">
+    {{ caller() }}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro text_field(name, label, desc, value='', placeholder='', type='text', required=False, wide=False) %}
+<div class="tf{% if wide %} span-all{% endif %}">
+  <div class="tf-outline">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <input type="{{ type }}" id="f-{{ name }}" name="{{ name }}"
+           value="{{ value }}" placeholder="{{ placeholder }}"
+           {% if required %}required{% endif %}>
+  </div>
+  <p class="helper">{{ desc }}</p>
+</div>
+{% endmacro %}
+
+{% macro select_field(name, label, desc, options, selected, wide=False) %}
+<div class="tf{% if wide %} span-all{% endif %}">
+  <div class="tf-outline">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <select id="f-{{ name }}" name="{{ name }}">
+      {% for value, option_label in options %}
+        <option value="{{ value }}" {% if value == selected %}selected{% endif %}>{{ option_label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <p class="helper">{{ desc }}</p>
+</div>
+{% endmacro %}
+
+{% macro toggle(name, label, desc, checked) %}
+<div class="switch-row span-all">
+  <label class="switch">
+    <input type="checkbox" id="f-{{ name }}" name="{{ name }}" value="1"
+           {% if checked %}checked{% endif %}>
+    <span class="track"><span class="thumb"></span></span>
+  </label>
+  <div class="switch-text">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <p class="helper">{{ desc }}</p>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro textarea_field(name, label, desc, value='', placeholder='', rows=4) %}
+<div class="tf span-all">
+  <div class="tf-outline">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}"
+              placeholder="{{ placeholder }}">{{ value }}</textarea>
+  </div>
+  <p class="helper">{{ desc }}</p>
+</div>
+{% endmacro %}
+
+{% macro save_button(label='Save') %}
+<div class="card-actions span-all">
+  <button type="submit" class="btn btn-contained">{{ label }}</button>
+</div>
+{% endmacro %}

@@ -1,57 +1,68 @@
 {% extends "base.html" %}
+{% from "macros.html" import card, save_button %}
 {% block content %}
 <h1>Branding</h1>
-<p class="muted">Personalize the look and feel of the Authelia login portal your users see.</p>
+<p class="page-desc">Make the login portal yours: theme, logo, favicon — and full restyling of the login screens with your own CSS.</p>
 
-<form method="post" enctype="multipart/form-data" class="form">
-  <h2>Color theme</h2>
-  <div class="theme-picker">
+<form method="post" enctype="multipart/form-data">
+{% call card('Theme', 'The base color scheme of the Authelia login portal.') %}
+  <div class="theme-picker span-all">
     {% for t in themes %}
-    <label class="theme-option theme-{{ t }}">
-      <input type="radio" name="theme" value="{{ t }}" {% if t == theme %}checked{% endif %}>
-      <span>{{ t }}</span>
+    <label class="theme-option theme-{{ t }} {% if theme == t %}selected{% endif %}">
+      <input type="radio" name="theme" value="{{ t }}" {% if theme == t %}checked{% endif %}>
+      <span class="theme-preview"><span class="theme-chip"></span></span>
+      <span class="theme-name">{{ t }}</span>
     </label>
     {% endfor %}
   </div>
-  <small><code>auto</code> follows the visitor's system light/dark preference.</small>
+  <p class="helper span-all">"auto" follows each visitor's system setting. If your screens look washed out or hard to read, try switching between light and dark first — then fine-tune with custom CSS below.</p>
+{% endcall %}
 
-  <h2>Logo</h2>
-  <p class="muted">
-    {% if has_logo %}A custom logo is active.{% else %}Using the default Authelia logo.{% endif %}
-    Upload a transparent PNG; Authelia resizes it automatically.
-  </p>
-  <label>Portal logo (PNG)
-    <input type="file" name="logo" accept=".png,image/png">
-  </label>
-
-  <h2>Favicon</h2>
-  <p class="muted">
-    {% if has_favicon %}A custom favicon is active.{% else %}Using the default Authelia favicon.{% endif %}
-  </p>
-  <label>Favicon (ICO)
-    <input type="file" name="favicon" accept=".ico,image/x-icon">
-  </label>
-
-  <button type="submit" class="btn btn-primary">Save branding</button>
+{% call card('Logo & favicon') %}
+  <div class="tf">
+    <div class="switch-text">
+      <label for="f-logo">Logo</label>
+      <p class="helper">PNG shown on the login screen instead of the Authelia logo. A square image around 256×256 px works best. {% if has_logo %}<strong>A custom logo is active.</strong>{% endif %}</p>
+    </div>
+    <input type="file" id="f-logo" name="logo" accept=".png">
+  </div>
+  <div class="tf">
+    <div class="switch-text">
+      <label for="f-favicon">Favicon</label>
+      <p class="helper">ICO file for the browser tab. {% if has_favicon %}<strong>A custom favicon is active.</strong>{% endif %}</p>
+    </div>
+    <input type="file" id="f-favicon" name="favicon" accept=".ico">
+  </div>
+{% endcall %}
+{{ save_button('Save branding') }}
 </form>
 
-<div class="actions">
+{% if has_logo or has_favicon %}
+<div class="page-actions">
   {% if has_logo %}
-  <form method="post" action="{{ url_for('branding_reset', asset='logo') }}">
-    <button type="submit" class="btn btn-danger">Remove custom logo</button>
+  <form method="post" action="{{ url_for('branding.reset', asset='logo') }}">
+    <button type="submit" class="btn btn-small">Remove custom logo</button>
   </form>
   {% endif %}
   {% if has_favicon %}
-  <form method="post" action="{{ url_for('branding_reset', asset='favicon') }}">
-    <button type="submit" class="btn btn-danger">Remove custom favicon</button>
+  <form method="post" action="{{ url_for('branding.reset', asset='favicon') }}">
+    <button type="submit" class="btn btn-small">Remove custom favicon</button>
   </form>
   {% endif %}
 </div>
+{% endif %}
 
-<h2>Going further</h2>
-<p class="help">
-  Portal texts (titles, button labels) can be customized per language by placing
-  locale overrides in <code>/addon_configs/…/assets/locales/&lt;lang&gt;/portal.json</code> —
-  see the <a href="https://www.authelia.com/reference/guides/server-asset-overrides/" target="_blank" rel="noopener">Authelia asset overrides guide</a>.
-</p>
+{% call card('Portal custom CSS', 'Restyle the Authelia login, consent and two-factor screens. The stylesheet is injected into every portal page and applies on the next page load — no restart needed. Leave empty and save to remove it.') %}
+<form method="post" action="{{ url_for('branding.custom_css') }}">
+  <div class="tf span-all">
+    <div class="tf-outline">
+      <label for="f-content">custom.css</label>
+      <textarea id="f-content" name="content" rows="16" class="code" spellcheck="false"
+                placeholder="{{ css_starter }}">{{ custom_css }}</textarea>
+    </div>
+    <p class="helper">The portal is built with Material UI, so <code class="inline-code">!important</code> is usually needed to override its styles. Open the portal in your browser, press F12 and use the element inspector to find the right selectors. If something breaks, just clear this field and save.</p>
+  </div>
+  {{ save_button('Save portal CSS') }}
+</form>
+{% endcall %}
 {% endblock %}
