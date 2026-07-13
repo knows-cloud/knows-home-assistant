@@ -1,21 +1,23 @@
-# Better Authelia — Home Assistant Add-on Repository
+# Knows-Cloud's Home Assistant Add-on Repository
+
+## Add-ons currently available
+
+- **[Better Authelia](authelia/)** — Authelia server + ingress admin UI
+- 
+## Better Authelia
 
 [Authelia](https://www.authelia.com/) SSO/2FA for Home Assistant, done right: instead of
 hand-editing YAML files (as with existing addons), this addon ships a full **admin UI in
 the Home Assistant sidebar** for configuring Authelia — settings, users, access-control
 rules, branding — plus one-click restarts to apply changes.
 
-## Add-ons
-
-- **[Better Authelia](authelia/)** — Authelia server + ingress admin UI
-
-## Installation
+### Installation
 
 1. In Home Assistant go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories**
    and add this repository URL.
 2. Install **Better Authelia** and follow [its documentation](authelia/DOCS.md).
 
-## Highlights
+### Highlights
 
 - 🖥️ Modern Home Assistant style UI — every setting explained in plain language, no Authelia or OIDC expertise needed
 - 🗂️ Settings segmented by topic: General, Session, Security, Two-Factor, Users, Access, SSO Clients, Notifications, Branding, Advanced
