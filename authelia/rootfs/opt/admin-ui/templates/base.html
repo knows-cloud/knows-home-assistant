@@ -3,37 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Authelia Admin</title>
+  <title>Authelia</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<header>
-  <div class="brand">🛡️ Authelia Admin</div>
-  <nav>
-    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('settings') }}">Settings</a>
-    <a href="{{ url_for('users') }}">Users</a>
-    <a href="{{ url_for('access') }}">Access Control</a>
-    <a href="{{ url_for('branding') }}">Branding</a>
-    <a href="{{ url_for('editor') }}">YAML Editor</a>
-  </nav>
+<header class="appbar">
+  <div class="appbar-title">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.1 14.8,9.5V11C15.4,11 16,11.6 16,12.3V15.8C16,16.4 15.4,17 14.7,17H9.2C8.6,17 8,16.4 8,15.7V12.2C8,11.6 8.6,11 9.2,11V9.5C9.2,8.1 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,9.5V11H13.5V9.5C13.5,8.7 12.8,8.2 12,8.2Z"/></svg>
+    <span>Authelia</span>
+  </div>
+  <div class="appbar-actions">
+    {% block appbar_actions %}{% endblock %}
+  </div>
 </header>
 
-{% if restart_needed %}
-<div class="banner">
-  <span>Configuration has changed — restart Authelia to apply.</span>
-  <form method="post" action="{{ url_for('restart') }}">
-    <button type="submit" class="btn btn-warn">Restart Authelia</button>
-  </form>
-</div>
-{% endif %}
+<nav class="tabs" aria-label="Sections">
+  {% for endpoint, label in nav %}
+    <a href="{{ url_for(endpoint) }}"
+       class="tab{% if request.endpoint == endpoint or (endpoint != 'dashboard' and request.endpoint and request.endpoint.startswith(endpoint.rsplit('.', 1)[0]) and endpoint.rsplit('.', 1)[0] in ['users', 'access', 'oidc', 'branding']) %} active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</nav>
 
 <main>
+  {% if restart_needed %}
+  <div class="banner">
+    <div class="banner-text">
+      <strong>Restart required</strong>
+      <span>Configuration has changed. Restart Authelia to apply it. The login portal keeps running until you do.</span>
+    </div>
+    <form method="post" action="{{ url_for('restart') }}">
+      <button type="submit" class="btn btn-warn">Restart Authelia</button>
+    </form>
+  </div>
+  {% endif %}
+
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-      <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% if category == 'secret' %}
+        <div class="flash flash-secret">
+          <strong>Client secret (shown only once — copy it now):</strong>
+          <code>{{ message }}</code>
+        </div>
+      {% else %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endif %}
     {% endfor %}
   {% endwith %}
+
   {% block content %}{% endblock %}
 </main>
 </body>

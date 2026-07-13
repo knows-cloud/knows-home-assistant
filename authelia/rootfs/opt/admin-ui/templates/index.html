@@ -1,48 +1,56 @@
 {% extends "base.html" %}
+{% from "macros.html" import card %}
 {% block content %}
-<h1>Dashboard</h1>
 
-<div class="cards">
-  <div class="card">
-    <h3>Status</h3>
-    <p class="status status-{{ status }}">{{ status }}</p>
-    <p class="muted">Authelia {{ version }}</p>
+<section class="card hero">
+  <div class="hero-main">
+    <div class="status-dot {{ status }}"></div>
+    <div>
+      <h1>Authelia is {{ status }}</h1>
+      <p class="desc">Version {{ version }} · protecting <strong>{{ domain }}</strong> · portal at <strong>{{ portal_url }}</strong></p>
+    </div>
   </div>
-  <div class="card">
-    <h3>Domain</h3>
-    <p>{{ domain }}</p>
-    <p class="muted">Portal: {{ portal_url }}</p>
+  <div class="hero-actions">
+    <form method="post" action="{{ url_for('validate') }}">
+      <button type="submit" class="btn">Check configuration</button>
+    </form>
+    <form method="post" action="{{ url_for('restart') }}">
+      <button type="submit" class="btn btn-primary">Restart Authelia</button>
+    </form>
   </div>
-  <div class="card">
-    <h3>Users</h3>
-    <p>{{ user_count }}</p>
-  </div>
-  <div class="card">
-    <h3>Access rules</h3>
-    <p>{{ rule_count }}</p>
-    <p class="muted">Default policy: {{ default_policy }}</p>
-  </div>
-  <div class="card">
-    <h3>Theme</h3>
-    <p>{{ theme }}</p>
-  </div>
+</section>
+
+<div class="stat-grid">
+  <a class="stat card" href="{{ url_for('users.index') }}">
+    <span class="stat-value">{{ user_count }}</span>
+    <span class="stat-label">User{{ 's' if user_count != 1 }}</span>
+    <span class="desc">Family members who can sign in</span>
+  </a>
+  <a class="stat card" href="{{ url_for('access.index') }}">
+    <span class="stat-value">{{ rule_count }}</span>
+    <span class="stat-label">Access rule{{ 's' if rule_count != 1 }}</span>
+    <span class="desc">Default policy: {{ default_policy.replace('_', ' ') }}</span>
+  </a>
+  <a class="stat card" href="{{ url_for('oidc.index') }}">
+    <span class="stat-value">{{ client_count if oidc_enabled else '—' }}</span>
+    <span class="stat-label">SSO client{{ 's' if client_count != 1 }}</span>
+    <span class="desc">{{ 'Apps signing in via OIDC' if oidc_enabled else 'OIDC not enabled yet' }}</span>
+  </a>
+  <a class="stat card" href="{{ url_for('branding.index') }}">
+    <span class="stat-value">{{ theme }}</span>
+    <span class="stat-label">Theme</span>
+    <span class="desc">Login portal look &amp; feel</span>
+  </a>
 </div>
 
-<div class="actions">
-  <form method="post" action="{{ url_for('restart') }}">
-    <button type="submit" class="btn btn-warn">Restart Authelia</button>
-  </form>
-  <form method="post" action="{{ url_for('validate') }}">
-    <button type="submit" class="btn">Validate configuration</button>
-  </form>
-</div>
+{% call card('Getting started', 'The typical order of setup for a home network.') %}
+  <ol class="steps">
+    <li><a href="{{ url_for('settings.general') }}">General</a> — set your domain and the address of the login portal.</li>
+    <li><a href="{{ url_for('users.index') }}">Users</a> — create an account for each family member.</li>
+    <li><a href="{{ url_for('access.index') }}">Access</a> — decide which apps need a password, which need two-factor, and which are open.</li>
+    <li><a href="{{ url_for('oidc.index') }}">SSO Clients</a> — connect apps like Grafana, Immich or Nextcloud so they use Authelia for login.</li>
+    <li><a href="{{ url_for('branding.index') }}">Branding</a> — pick a theme, add your own logo and restyle the login screens.</li>
+  </ol>
+{% endcall %}
 
-<h2>Getting started</h2>
-<ol class="help">
-  <li>Set your <a href="{{ url_for('settings') }}">domain and portal URL</a>.</li>
-  <li>Create <a href="{{ url_for('users') }}">users</a> and assign groups.</li>
-  <li>Define <a href="{{ url_for('access') }}">access control rules</a> per subdomain.</li>
-  <li>Point your reverse proxy (NPM, Traefik, Caddy…) at port <code>9091</code> of this addon.</li>
-  <li>Personalize the portal under <a href="{{ url_for('branding') }}">Branding</a>.</li>
-</ol>
 {% endblock %}

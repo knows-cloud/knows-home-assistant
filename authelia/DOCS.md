@@ -6,12 +6,18 @@ hand-editing YAML files over SSH.
 ## What you get
 
 - **Authelia** (single sign-on portal + 2FA) exposed on port `9091` for your reverse proxy.
-- **Admin UI** in the Home Assistant sidebar (via ingress, protected by your HA login) to manage:
-  - Domain, portal URL, session lifetimes, brute-force protection, log level
-  - Users: create, delete, enable/disable, reset passwords (argon2id hashed for you)
-  - Access control rules: per-domain policies (`bypass` / `one_factor` / `two_factor` / `deny`), subjects and resource regexes, with ordering
-  - Branding: color theme (light/dark/grey/auto), custom portal logo and favicon
-  - A raw YAML editor for everything else (OIDC, LDAP, SMTP…), validated with `authelia validate-config` before saving
+- **Admin UI** in the Home Assistant sidebar (via ingress, protected by your HA login) with
+  settings segmented by topic, each explained in plain language:
+  - **General** — domain, portal URL, after-login destination, log level
+  - **Session** — sign-in lifetime, inactivity timeout, "remember me" duration
+  - **Security** — brute-force protection, password policy, self-service password reset
+  - **Two-Factor** — TOTP (issuer, algorithm, digits, period) and WebAuthn/passkeys
+  - **Users** — create, edit, delete, enable/disable, reset passwords (argon2id hashed for you)
+  - **Access** — per-domain policies (`bypass` / `one_factor` / `two_factor` / `deny`), subjects and resource regexes, with ordering
+  - **SSO Clients** — enable the OIDC provider with one click and manage per-app clients (Grafana, Immich, Nextcloud, …); secrets are generated and hashed for you
+  - **Notifications** — filesystem or SMTP email delivery for password-reset links
+  - **Branding** — color theme (light/dark/grey/auto), custom portal logo and favicon, and **custom CSS injected into the login portal**
+  - **Advanced** — a raw YAML editor for everything else (LDAP, Redis, external DBs…), validated with `authelia validate-config` before saving
   - One-click **Restart Authelia** to apply changes — no addon restart needed
 
 ## Installation
@@ -45,6 +51,32 @@ forward-auth as usual, e.g. for Nginx Proxy Manager / Traefik / Caddy following 
 [Authelia proxy integration docs](https://www.authelia.com/integration/proxies/introduction/).
 The portal URL you set under *Settings* (e.g. `https://auth.example.com`) must route to
 this addon's port 9091.
+
+## Single sign-on for your apps (OIDC)
+
+Open **SSO Clients** and press *Enable OIDC provider* — the addon generates the
+signing keys automatically. Then add one client per app. For each client the UI
+generates a client secret, hashes it into the configuration and shows the
+plaintext **once** — paste it into the app immediately. The page also lists the
+issuer/authorization/token/userinfo URLs apps ask for.
+
+If an app logs in fine but doesn't know who the user is (no name/email/roles),
+enable the client's **"Include profile details in the ID token"** compatibility
+toggle — Authelia 4.39 moved those claims to the userinfo endpoint and some
+apps never call it.
+
+## Restyling the login portal
+
+Authelia natively supports only theme, logo and favicon. This addon goes
+further: a small internal nginx proxy sits in front of the portal and injects
+`/config/assets/custom.css` into every portal page. Edit the CSS on the
+**Branding** page — changes apply on the next page load, no restart. If you
+break something, clear the field and save.
+
+Because of this proxy, Authelia itself listens on `127.0.0.1:9092` inside the
+container while port `9091` is served by nginx. Your reverse proxy setup does
+not change. One limitation: configuring TLS under `server.tls` in the Authelia
+config is not supported — terminate TLS at your reverse proxy.
 
 ## Notes on the notifier
 

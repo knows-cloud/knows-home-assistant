@@ -1,0 +1,76 @@
+{# Reusable Home Assistant style form building blocks. #}
+
+{% macro card(title, desc='') %}
+<section class="card">
+  <header class="card-header">
+    <h2>{{ title }}</h2>
+    {% if desc %}<p>{{ desc }}</p>{% endif %}
+  </header>
+  <div class="card-body">
+    {{ caller() }}
+  </div>
+</section>
+{% endmacro %}
+
+{% macro text_field(name, label, desc, value='', placeholder='', type='text', required=False) %}
+<div class="row">
+  <div class="row-text">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <p class="desc">{{ desc }}</p>
+  </div>
+  <div class="row-control">
+    <input type="{{ type }}" id="f-{{ name }}" name="{{ name }}"
+           value="{{ value }}" placeholder="{{ placeholder }}"
+           {% if required %}required{% endif %}>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro select_field(name, label, desc, options, selected) %}
+<div class="row">
+  <div class="row-text">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <p class="desc">{{ desc }}</p>
+  </div>
+  <div class="row-control">
+    <select id="f-{{ name }}" name="{{ name }}">
+      {% for value, option_label in options %}
+        <option value="{{ value }}" {% if value == selected %}selected{% endif %}>{{ option_label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro toggle(name, label, desc, checked) %}
+<div class="row">
+  <div class="row-text">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <p class="desc">{{ desc }}</p>
+  </div>
+  <div class="row-control">
+    <label class="switch">
+      <input type="checkbox" id="f-{{ name }}" name="{{ name }}" value="1"
+             {% if checked %}checked{% endif %}>
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro textarea_field(name, label, desc, value='', placeholder='', rows=4) %}
+<div class="row row-stack">
+  <div class="row-text">
+    <label for="f-{{ name }}">{{ label }}</label>
+    <p class="desc">{{ desc }}</p>
+  </div>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}"
+            placeholder="{{ placeholder }}">{{ value }}</textarea>
+</div>
+{% endmacro %}
+
+{% macro save_button(label='Save') %}
+<div class="card-actions">
+  <button type="submit" class="btn btn-primary">{{ label }}</button>
+</div>
+{% endmacro %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, save_button %}
+{% block content %}
+<h1>Session</h1>
+<p class="page-desc">How long people stay signed in. Durations use short units: <code>30s</code>, <code>5m</code>, <code>12h</code>, <code>7d</code>, <code>1M</code> (one month), <code>1y</code>.</p>
+
+<form method="post">
+{% call card('Sign-in lifetime') %}
+  {{ text_field('expiration', 'Session length',
+     'The maximum time a sign-in stays valid. After this, users must log in again even if they were active. "1h" is a sensible default for a home network.',
+     value=expiration, placeholder='1h') }}
+  {{ text_field('inactivity', 'Inactivity timeout',
+     'Sign out users who have been idle for this long. Shorter is safer on shared devices; "5m" means five idle minutes end the session.',
+     value=inactivity, placeholder='5m') }}
+  {{ text_field('remember_me', '"Remember me" duration',
+     'How long the session lasts when someone ticks "Remember me" on the login screen. "1M" keeps the family logged in for a month on their own devices.',
+     value=remember_me, placeholder='1M') }}
+{% endcall %}
+{{ save_button() }}
+</form>
+{% endblock %}

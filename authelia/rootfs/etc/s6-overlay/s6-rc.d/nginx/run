@@ -1,0 +1,6 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Run the nginx front proxy (injects custom portal CSS)
+# ==============================================================================
+bashio::log.info "Starting portal proxy..."
+exec nginx -c /etc/nginx/nginx.conf -g "daemon off;"

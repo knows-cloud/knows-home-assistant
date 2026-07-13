@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% from "macros.html" import card, save_button %}
 {% block content %}
-<h1>YAML Editor</h1>
-<p class="muted">
-  Full configuration for advanced tweaks the forms don't cover (OIDC provider, LDAP backend,
-  SMTP notifier…). Saves are validated with <code>authelia validate-config</code> first;
-  the previous version is kept as <code>configuration.yml.bak</code>.
-</p>
+<h1>Advanced</h1>
+<p class="page-desc">The raw Authelia configuration for anything the pages above don't cover (LDAP backend, Redis sessions, external databases, ...). Saving validates the file with Authelia first — invalid configurations are rejected, so you can't break a running setup from here.</p>
 
-<form method="post" class="form">
-  <textarea name="content" rows="30" spellcheck="false">{{ content }}</textarea>
-  <button type="submit" class="btn btn-primary">Validate &amp; save</button>
+{% call card('configuration.yml') %}
+<form method="post">
+  <textarea name="content" rows="28" class="code" spellcheck="false">{{ content }}</textarea>
+  <p class="desc">A backup of the previous version is kept at <code>configuration.yml.bak</code>. Secrets (session, storage, JWT) live in <code>/config/secrets/</code> and are injected automatically — don't add them here.</p>
+  {{ save_button('Validate & save') }}
 </form>
+{% endcall %}
 {% endblock %}

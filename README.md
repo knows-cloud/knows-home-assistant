@@ -17,10 +17,13 @@ rules, branding — plus one-click restarts to apply changes.
 
 ## Highlights
 
-- 🖥️ Real configuration UI (no SSH, no YAML required for common tasks)
+- 🖥️ Modern Home Assistant style UI — every setting explained in plain language, no Authelia or OIDC expertise needed
+- 🗂️ Settings segmented by topic: General, Session, Security, Two-Factor, Users, Access, SSO Clients, Notifications, Branding, Advanced
+- 🔑 One-click OIDC provider with per-app SSO client management (Grafana, Immich, Nextcloud, …) — secrets generated, hashed and shown once
 - 👤 User management with proper argon2id password hashing
 - 🚦 Access-control rule editor (bypass / one_factor / two_factor / deny, ordering, subjects, resources)
-- 🎨 Personalization: color theme (light/dark/grey/auto), custom logo and favicon for the SSO portal
+- 🎨 Personalization: color theme (light/dark/grey/auto), custom logo and favicon — plus **custom CSS injected into the login portal** to fix its readability or restyle it completely
+- 📧 Password-reset emails via SMTP configured from the UI
 - ✅ Config changes validated with `authelia validate-config` before they land
 - 🔁 Restart Authelia from the UI to apply changes — the addon itself keeps running
 - 🔐 Secrets auto-generated and kept out of the config file

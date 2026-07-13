@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, textarea_field, select_field, toggle, save_button %}
+{% block content %}
+{% set editing = client is not none %}
+<h1>{{ 'Edit client: ' + client.client_id if editing else 'Add SSO client' }}</h1>
+<p class="page-desc">{% if editing %}Changing settings for this app's login.{% else %}Registers an app so it can sign users in through Authelia. When you save, a client secret is generated and <strong>shown once</strong> — paste it into the app right away.{% endif %}</p>
+
+<form method="post">
+{% call card('Application') %}
+  {% if not editing %}
+  {{ text_field('client_id', 'Client ID',
+     'A short identifier you also enter in the app, e.g. "grafana". Letters, digits, dots, dashes and underscores.',
+     required=True) }}
+  {% endif %}
+  {{ text_field('client_name', 'Display name',
+     'Shown to users on the consent screen ("grafana wants to access...").',
+     value=client.client_name if editing else '') }}
+  {{ textarea_field('redirect_uris', 'Redirect URIs',
+     'One per line. This is the address inside the app where Authelia sends users back after login — the app\'s documentation calls it "redirect URI" or "callback URL". Example for Grafana: https://grafana.example.com/login/generic_oauth',
+     value=(client.redirect_uris | join('\n')) if editing else '', rows=3) }}
+{% endcall %}
+
+{% call card('Login requirements') %}
+  {{ select_field('authorization_policy', 'Required login strength',
+     'What users must present before this app lets them in.',
+     [('one_factor', 'one_factor — password'), ('two_factor', 'two_factor — password + second factor')],
+     client.authorization_policy if editing else 'one_factor') }}
+  {{ select_field('consent_mode', 'Consent screen',
+     '"auto" only asks the first time and remembers the answer (recommended). "explicit" asks on every login. "implicit" never asks. "pre-configured" remembers the answer for a set duration.',
+     [('auto', 'auto (recommended)'), ('explicit', 'explicit'), ('implicit', 'implicit'), ('pre-configured', 'pre-configured')],
+     client.consent_mode if editing and client.consent_mode else 'auto') }}
+  {{ text_field('consent_duration', 'Consent validity (only for pre-configured)',
+     'How long a remembered consent lasts, e.g. "1M" for a month.',
+     value=client.pre_configured_consent_duration if editing and client.pre_configured_consent_duration else '1M') }}
+{% endcall %}
+
+{% call card('What the app may know', 'Scopes control which profile details the app can request.') %}
+  {{ toggle('scope_profile', 'Profile (name & username)', 'Lets the app greet users by name.',
+     'profile' in client.scopes if editing else True) }}
+  {{ toggle('scope_email', 'Email address', 'Most apps need this to create their local user account.',
+     'email' in client.scopes if editing else True) }}
+  {{ toggle('scope_groups', 'Groups', 'Lets the app map Authelia groups to its own roles, e.g. group "admins" becomes Grafana Admin.',
+     'groups' in client.scopes if editing else True) }}
+  {{ toggle('scope_offline_access', 'Stay signed in (offline access)', 'Allows the app to refresh the login in the background without asking the user again. Only needed by a few apps.',
+     'offline_access' in client.scopes if editing else False) }}
+{% endcall %}
+
+{% call card('Compatibility') %}
+  {{ toggle('legacy_claims', 'Include profile details in the ID token',
+     'Some apps (Grafana without a userinfo URL, some older apps) expect email, name and groups directly inside the ID token instead of fetching them separately. Turn this on if login works but the app cannot see who the user is.',
+     client.claims_policy == 'legacy' if editing else False) }}
+  {{ toggle('public', 'Public client (no secret)',
+     'Only for apps that cannot keep a secret, such as pure browser or mobile apps. Normal server apps like Grafana or Nextcloud should leave this off.',
+     client.public if editing else False) }}
+{% endcall %}
+
+<div class="card-actions page-actions">
+  <a href="{{ url_for('oidc.index') }}" class="btn">Cancel</a>
+  <button type="submit" class="btn btn-primary">{{ 'Save changes' if editing else 'Create client' }}</button>
+</div>
+</form>
+{% endblock %}

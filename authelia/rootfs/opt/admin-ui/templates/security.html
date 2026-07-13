@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, toggle, save_button %}
+{% block content %}
+<h1>Security</h1>
+<p class="page-desc">Protection against password guessing and rules for choosing good passwords.</p>
+
+<form method="post">
+{% call card('Brute-force protection', 'Authelia temporarily bans accounts after repeated failed logins.') %}
+  {{ text_field('max_retries', 'Allowed failed attempts',
+     'How many wrong passwords are tolerated within the observation window before the account is temporarily banned. 3 is a good balance for a family.',
+     value=max_retries, type='number') }}
+  {{ text_field('find_time', 'Observation window',
+     'Failed attempts within this window count towards the limit. "2m" means three failures within two minutes trigger a ban.',
+     value=find_time, placeholder='2m') }}
+  {{ text_field('ban_time', 'Ban duration',
+     'How long the account stays locked after too many failures. Keep it short at home — "5m" stops guessing without locking the kids out for hours.',
+     value=ban_time, placeholder='5m') }}
+{% endcall %}
+
+{% call card('Password rules', 'Requirements checked when users set or reset their password.') %}
+  {{ toggle('policy_enabled', 'Enforce a password policy',
+     'When off, any password is accepted. Turn on to require a minimum quality for everyone.',
+     policy_enabled) }}
+  {{ text_field('min_length', 'Minimum length',
+     'The shortest allowed password. Length matters more than special characters — 10 or more is a good target.',
+     value=min_length, type='number') }}
+  {{ toggle('require_uppercase', 'Require an uppercase letter', 'At least one A–Z character.', require_uppercase) }}
+  {{ toggle('require_lowercase', 'Require a lowercase letter', 'At least one a–z character.', require_lowercase) }}
+  {{ toggle('require_number', 'Require a number', 'At least one digit 0–9.', require_number) }}
+  {{ toggle('require_special', 'Require a special character', 'At least one symbol like ! ? # or %.', require_special) }}
+{% endcall %}
+
+{% call card('Password reset') %}
+  {{ toggle('allow_reset', 'Allow self-service password reset',
+     'Shows a "Reset password?" link on the login page. The reset link is delivered via the Notifications settings — set up email there first, otherwise the link only lands in a file on the server.',
+     allow_reset) }}
+{% endcall %}
+{{ save_button() }}
+</form>
+{% endblock %}

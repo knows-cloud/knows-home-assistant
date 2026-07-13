@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "macros.html" import card, text_field, select_field, save_button %}
+{% block content %}
+<h1>General</h1>
+<p class="page-desc">The basics: which domain Authelia protects and where its login portal lives.</p>
+
+<form method="post">
+{% call card('Domain & portal') %}
+  {{ text_field('domain', 'Protected domain',
+     'Your home domain. Authelia protects every subdomain of it, e.g. grafana.example.com and photos.example.com. Enter it without "https://" and without a subdomain.',
+     value=domain, placeholder='example.com', required=True) }}
+  {{ text_field('authelia_url', 'Login portal address',
+     'The full address where users reach the Authelia login page. It must be a subdomain of the protected domain and your reverse proxy must forward it to this addon on port 9091.',
+     value=authelia_url, placeholder='https://auth.example.com', required=True) }}
+  {{ text_field('default_redirection_url', 'After-login destination (optional)',
+     'Where users land after signing in directly at the portal (rather than being sent back to an app). Leave empty to show the portal itself.',
+     value=default_redirection_url, placeholder='https://home.example.com') }}
+{% endcall %}
+
+{% call card('Logging') %}
+  {{ select_field('log_level', 'Log detail',
+     '"info" is right for day-to-day use. Switch to "debug" or "trace" temporarily when you are troubleshooting a login problem, then switch back — verbose logs grow quickly.',
+     [('trace', 'trace (most detail)'), ('debug', 'debug'), ('info', 'info (recommended)'), ('warn', 'warn'), ('error', 'error (least detail)')],
+     log_level) }}
+{% endcall %}
+{{ save_button() }}
+</form>
+{% endblock %}

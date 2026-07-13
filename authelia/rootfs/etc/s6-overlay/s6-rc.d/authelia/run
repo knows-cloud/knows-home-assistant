@@ -6,5 +6,10 @@ export AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=/config/secre
 export AUTHELIA_SESSION_SECRET_FILE=/config/secrets/session_secret
 export AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/config/secrets/storage_encryption_key
 
+# Authelia listens internally; nginx serves port 9091 and injects the custom
+# portal CSS. The env var overrides whatever server.address the config file
+# has, so migrated configs keep working unchanged.
+export AUTHELIA_SERVER_ADDRESS=tcp://127.0.0.1:9092
+
 bashio::log.info "Starting Authelia..."
 exec authelia --config /config/configuration.yml

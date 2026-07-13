@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "macros.html" import card %}
+{% block content %}
+<h1>SSO Clients</h1>
+<p class="page-desc">Single sign-on via OpenID Connect: apps like Grafana, Immich, Nextcloud or Jellyfin log your family in through Authelia instead of keeping their own passwords.</p>
+
+{% if not enabled %}
+{% call card('Enable single sign-on', 'One click sets everything up.') %}
+  <p class="desc">This generates the cryptographic signing keys Authelia needs to act as an identity provider and stores them in the configuration. Afterwards you add one "client" per app.</p>
+  <form method="post" action="{{ url_for('oidc.enable') }}">
+    <div class="card-actions">
+      <button type="submit" class="btn btn-primary">Enable OIDC provider</button>
+    </div>
+  </form>
+{% endcall %}
+{% else %}
+
+{% call card('Your provider endpoints', 'Apps ask for these URLs when you configure "Generic OAuth" or "OpenID Connect" login in them.') %}
+  {% if issuer %}
+  <dl class="endpoints">
+    <div><dt>Issuer / Discovery</dt><dd><code>{{ issuer }}/.well-known/openid-configuration</code></dd></div>
+    <div><dt>Authorization</dt><dd><code>{{ issuer }}/api/oidc/authorization</code></dd></div>
+    <div><dt>Token</dt><dd><code>{{ issuer }}/api/oidc/token</code></dd></div>
+    <div><dt>Userinfo</dt><dd><code>{{ issuer }}/api/oidc/userinfo</code></dd></div>
+  </dl>
+  <p class="desc">Tip: many apps only need the issuer URL ({{ issuer }}) and find the rest via discovery.</p>
+  {% else %}
+  <p class="desc">Set the login portal address on the General page first — the endpoint URLs derive from it.</p>
+  {% endif %}
+{% endcall %}
+
+{% call card('Clients', 'One entry per app that signs in through Authelia.') %}
+  {% if clients %}
+  <div class="rule-list">
+    {% for client in clients %}
+    <div class="rule">
+      <div class="rule-body">
+        <div class="rule-domains">{{ client.client_name or client.client_id }} <span class="chip">{{ client.client_id }}</span>
+          {% if client.public %}<span class="chip">public</span>{% endif %}
+          {% if client.claims_policy == 'legacy' %}<span class="chip">legacy claims</span>{% endif %}
+        </div>
+        <div class="desc">{{ (client.redirect_uris or []) | join(' · ') }}</div>
+      </div>
+      <span class="badge badge-{{ client.authorization_policy or 'one_factor' }}">{{ (client.authorization_policy or 'one_factor').replace('_', ' ') }}</span>
+      <a class="btn btn-small" href="{{ url_for('oidc.edit_client', client_id=client.client_id) }}">Edit</a>
+      {% if not client.public %}
+      <form method="post" action="{{ url_for('oidc.regenerate_secret', client_id=client.client_id) }}"
+            onsubmit="return confirm('Generate a new secret? The app stops working until you paste the new secret into it.');">
+        <button type="submit" class="btn btn-small">New secret</button>
+      </form>
+      {% endif %}
+      <form method="post" action="{{ url_for('oidc.delete_client', client_id=client.client_id) }}"
+            onsubmit="return confirm('Delete client {{ client.client_id }}? The app loses its login.');">
+        <button type="submit" class="btn btn-small btn-danger">Delete</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="desc">No clients yet. Add one for each app that should use Authelia login.</p>
+  {% endif %}
+  <div class="card-actions">
+    <a href="{{ url_for('oidc.new_client') }}" class="btn btn-primary">Add client</a>
+  </div>
+{% endcall %}
+{% endif %}
+{% endblock %}

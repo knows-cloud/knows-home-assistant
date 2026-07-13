@@ -1,75 +1,78 @@
 {% extends "base.html" %}
+{% from "macros.html" import card, text_field, select_field, save_button %}
 {% block content %}
-<h1>Access Control</h1>
+<h1>Access</h1>
+<p class="page-desc">Who may reach which app, and how strong the login must be. Rules are checked <strong>top to bottom — the first match wins</strong>. Anything no rule matches gets the default policy.</p>
 
-<form method="post" action="{{ url_for('access_default') }}" class="form form-inline">
-  <label>Default policy
-    <select name="default_policy">
-      {% for policy in policies %}
-      <option value="{{ policy }}" {% if policy == default_policy %}selected{% endif %}>{{ policy }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <button type="submit" class="btn btn-primary">Save</button>
-  <small>Applied when no rule below matches. Rules are evaluated top to bottom — first match wins.</small>
+<div class="policy-legend card">
+  <div><span class="badge badge-bypass">bypass</span> no login at all — for public pages</div>
+  <div><span class="badge badge-one_factor">one factor</span> password only</div>
+  <div><span class="badge badge-two_factor">two factor</span> password + authenticator code or security key</div>
+  <div><span class="badge badge-deny">deny</span> nobody gets in, even with a valid login</div>
+</div>
+
+{% call card('Default policy', 'Applies to every subdomain that no rule below matches.') %}
+<form method="post" action="{{ url_for('access.default') }}">
+  {{ select_field('default_policy', 'Policy for everything else',
+     'A safe choice is "one_factor": every app at least requires a password unless a rule says otherwise.',
+     [('bypass', 'bypass — open to everyone'), ('one_factor', 'one_factor — password required'), ('two_factor', 'two_factor — password + second factor'), ('deny', 'deny — block everything')],
+     default_policy) }}
+  {{ save_button('Save default') }}
 </form>
+{% endcall %}
 
-<h2>Rules</h2>
-<table class="table">
-  <thead>
-    <tr><th>#</th><th>Domain(s)</th><th>Policy</th><th>Subjects</th><th>Resources</th><th>Actions</th></tr>
-  </thead>
-  <tbody>
+{% call card('Rules', 'Evaluated top to bottom. Use the arrows to reorder — put specific rules above general ones.') %}
+{% if rules %}
+<div class="rule-list">
   {% for rule in rules %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ rule.domain if rule.domain is string else (rule.domain or []) | join(', ') }}</td>
-      <td><span class="policy policy-{{ rule.policy }}">{{ rule.policy }}</span></td>
-      <td>{{ (rule.subject or []) | join(', ') }}</td>
-      <td>{{ (rule.resources or []) | join(', ') }}</td>
-      <td class="cell-actions">
-        <form method="post" action="{{ url_for('access_move', index=loop.index0) }}">
-          <input type="hidden" name="direction" value="up">
-          <button type="submit" class="btn btn-small" {% if loop.first %}disabled{% endif %}>▲</button>
-        </form>
-        <form method="post" action="{{ url_for('access_move', index=loop.index0) }}">
-          <input type="hidden" name="direction" value="down">
-          <button type="submit" class="btn btn-small" {% if loop.last %}disabled{% endif %}>▼</button>
-        </form>
-        <form method="post" action="{{ url_for('access_delete', index=loop.index0) }}"
-              onsubmit="return confirm('Delete this rule?');">
-          <button type="submit" class="btn btn-small btn-danger">Delete</button>
-        </form>
-      </td>
-    </tr>
-  {% else %}
-    <tr><td colspan="6">No rules — the default policy applies to everything.</td></tr>
+  <div class="rule">
+    <div class="rule-order">
+      <span class="rule-index">{{ loop.index }}</span>
+      <form method="post" action="{{ url_for('access.move', index=loop.index0) }}">
+        <input type="hidden" name="direction" value="up">
+        <button class="btn btn-icon" {% if loop.first %}disabled{% endif %} title="Move up">▲</button>
+      </form>
+      <form method="post" action="{{ url_for('access.move', index=loop.index0) }}">
+        <input type="hidden" name="direction" value="down">
+        <button class="btn btn-icon" {% if loop.last %}disabled{% endif %} title="Move down">▼</button>
+      </form>
+    </div>
+    <div class="rule-body">
+      <div class="rule-domains">{{ rule.domain | join(', ') if rule.domain is iterable and rule.domain is not string else rule.domain }}</div>
+      <div class="desc">
+        {% if rule.subject %}only for: {{ rule.subject | join(', ') }}{% endif %}
+        {% if rule.resources %}{% if rule.subject %} · {% endif %}paths: {{ rule.resources | join(', ') }}{% endif %}
+        {% if not rule.subject and not rule.resources %}for everyone, all paths{% endif %}
+      </div>
+    </div>
+    <span class="badge badge-{{ rule.policy }}">{{ rule.policy.replace('_', ' ') }}</span>
+    <form method="post" action="{{ url_for('access.delete', index=loop.index0) }}"
+          onsubmit="return confirm('Delete this rule?');">
+      <button type="submit" class="btn btn-small btn-danger">Delete</button>
+    </form>
+  </div>
   {% endfor %}
-  </tbody>
-</table>
+</div>
+{% else %}
+<p class="desc">No rules yet — every app currently uses the default policy.</p>
+{% endif %}
+{% endcall %}
 
-<h2>Add rule</h2>
-<form method="post" action="{{ url_for('access_add') }}" class="form">
-  <div class="row">
-    <label>Domain(s), comma separated
-      <input type="text" name="domain" placeholder="app.example.com, *.example.com" required>
-    </label>
-    <label>Policy
-      <select name="policy">
-        {% for policy in policies %}
-        <option value="{{ policy }}">{{ policy }}</option>
-        {% endfor %}
-      </select>
-    </label>
-  </div>
-  <div class="row">
-    <label>Subjects (optional, comma separated)
-      <input type="text" name="subjects" placeholder="user:alice, group:admins">
-    </label>
-    <label>Resource regexes (optional, comma separated)
-      <input type="text" name="resources" placeholder="^/admin/.*$">
-    </label>
-  </div>
-  <button type="submit" class="btn btn-primary">Add rule</button>
+{% call card('Add rule') %}
+<form method="post" action="{{ url_for('access.add') }}">
+  {{ text_field('domain', 'Domains',
+     'Which subdomains this rule covers, comma separated. Wildcards work: "*.example.com" matches every subdomain.',
+     placeholder='grafana.example.com, photos.example.com', required=True) }}
+  {{ select_field('policy', 'Policy', 'What this rule requires for the domains above.',
+     [('bypass', 'bypass — open to everyone'), ('one_factor', 'one_factor — password required'), ('two_factor', 'two_factor — password + second factor'), ('deny', 'deny — block everything')],
+     'one_factor') }}
+  {{ text_field('subjects', 'Limit to users or groups (optional)',
+     'Comma separated, using "user:name" or "group:name". Example: "group:admins" makes this rule apply only to admins — others fall through to the next rule.',
+     placeholder='group:admins, user:anna') }}
+  {{ text_field('resources', 'Limit to paths (optional)',
+     'Regular expressions for URL paths. Example: "^/api/.*$" applies the rule only to API calls — handy for letting apps talk to each other without a login.',
+     placeholder='^/api/.*$') }}
+  {{ save_button('Add rule') }}
 </form>
+{% endcall %}
 {% endblock %}
