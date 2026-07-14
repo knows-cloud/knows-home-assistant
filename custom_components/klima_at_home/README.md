@@ -36,6 +36,82 @@ Beim ersten Start lädt die Integration einmalig 30 Jahre Klimadaten (1961–199
 Das dauert einen Moment und passiert **genau ein Mal** — danach liegt es im Cache, ein Neustart
 löst es nicht erneut aus.
 
+## Was die Zahlen bedeuten
+
+### Dürre zeigt „Problem" statt „an"
+
+Das ist nur die Beschriftung, kein Fehler. Der Sensor hat die `device_class: problem`, und solche
+Binärsensoren beschriftet Home Assistant grundsätzlich mit **„Problem" / „OK"** statt mit *an/aus*.
+**„Problem" heißt: es herrscht gerade Dürre.**
+
+**Warum** er angegangen ist, steht im Attribut **`ausgeloest_durch`** — es nennt das Kriterium
+beim Namen. Zwei Auslöser, die unabhängig voneinander greifen, weil sie Verschiedenes erfassen:
+
+| Auslöser | Schwelle | Erfasst |
+|---|---|---|
+| **Tage ohne Regen** | ≥ 14 Tage | die spürbare, lange regenlose Serie |
+| **SPI 30 Tage** | ≤ −1,0 | ein echtes Niederschlagsdefizit, auch wenn zwischendurch etwas fiel |
+
+Deshalb kann „Dürre" angehen, obwohl gestern Regen gemeldet war: Ein Monat mit gelegentlichem
+Nieselregen, aber weit unter dem Normalwert, ist eine Dürre — auch wenn „Tage ohne Regen" auf 0
+steht. Umgekehrt sind zwei trockene Wochen nach einem nassen Monat noch keine.
+
+### Tage ohne Regen
+
+Ein **Trockentag ist ein Tag mit weniger als 1 mm Niederschlag** — die ETCCDI-Definition der
+*consecutive dry days*, nicht „exakt 0 mm". Sonst würde schon 0,1 mm Niesel oder Taubeschlag die
+Serie zurücksetzen, obwohl im Boden nichts ankommt. Erst ab 1 mm gilt der Tag als Regentag und der
+Zähler springt auf 0.
+
+Das Attribut **`trockener_als_in_prozent_der_jahre`** ordnet die laufende Serie jahreszeitlich ein:
+14 trockene Tage sind im August normal, im November nicht.
+
+### Niederschlag 30 / 90 Tage
+
+Der **Anteil am Normalwert derselben Jahreszeit**, in Prozent. Es wird der Regen der letzten 30 bzw.
+90 Tage summiert und mit dem verglichen, was in genau diesem Zeitfenster historisch normal fällt.
+
+- **100 %** — ein ganz normaler Zeitraum
+- **40 %** — nur 40 % der üblichen Menge, deutlich zu trocken
+- **180 %** — 80 % mehr Regen als sonst
+
+**Warum zwei Zeiträume:** 30 Tage zeigen die aktuelle Lage (Rasen, Beete, Oberboden), 90 Tage die
+längerfristige — davon leben Bäume, und daraus entsteht die Grundwasserneubildung. Ein einzelner
+Starkregen reißt die 30-Tage-Zahl wieder hoch, während die 90-Tage-Zahl unten bleibt: dann ist der
+Boden nur oberflächlich nass, das Defizit aber nicht aufgeholt.
+
+### SPI 30 / 90 Tage
+
+Der **Standardized Precipitation Index**, der von der WMO als Standard anerkannte Dürreindex. Er
+beantwortet die Frage: *Wie ungewöhnlich ist diese Regenmenge für diese Jahreszeit an diesem Ort?*
+Dazu wird die aktuelle Summe gegen die Verteilung aller historischen Werte desselben Zeitfensters
+gehalten und in Standardabweichungen ausgedrückt. Die gleiche Einordnung steht im Klartext im
+Attribut `einordnung`.
+
+| SPI | Einordnung |
+|---|---|
+| ≥ +1,5 | sehr feucht |
+| +1,0 … +1,5 | feucht |
+| −1,0 … +1,0 | normal |
+| −1,5 … −1,0 | mäßige Dürre |
+| −2,0 … −1,5 | schwere Dürre |
+| ≤ −2,0 | extreme Dürre |
+
+**Warum SPI zusätzlich zu den Prozentwerten?** Die Prozentzahl allein sagt nicht, ob eine Abweichung
+außergewöhnlich *ist*. 50 % des Normalwerts sind im nassen Januar dramatisch, im ohnehin trockenen
+August aber halb normal — der SPI rechnet das heraus, die Prozentzahl nicht. Dafür ist die
+Prozentzahl sofort verständlich. Deshalb gibt es beide: eine zum Verstehen, eine zum Einordnen. Für
+Automatisierungen ist der SPI die robustere Größe; **−1,0** ist die offizielle Dürre-Schwelle.
+
+### Temperaturabweichung
+
+Wie weit das heutige Tagesmittel über (oder unter) dem langjährigen Mittel **desselben Kalendertags**
+im Zeitraum **1961–1990** liegt — dem WMO-Referenzzeitraum für Klimaanomalien. `+5,3 °C` heißt also
+nicht „5 °C wärmer als gestern", sondern „5 °C wärmer, als dieser Tag im Mittel von 1961–1990 war".
+
+Die Attribute `normal_1961_1990` und `tagesmittel_heute` zeigen beide Größen, aus denen sich die
+Differenz ergibt — die Zahl bleibt damit nachprüfbar.
+
 ## Was du wissen solltest
 
 ### Grundwasser gibt es nur als Einordnung, nicht in Metern
@@ -69,16 +145,6 @@ kein ausgerufener Wassernotstand.
 
 Für Orte außerhalb Deutschlands entstehen die Wetter-, Klima- und Dürre-Entitäten ganz normal —
 das Grundwasser-Gerät entfällt einfach.
-
-### Warum „Dürre" angehen kann, obwohl es gestern geregnet hat
-
-Zwei unabhängige Kriterien lösen aus, weil sie Verschiedenes erfassen: eine **lange regenlose
-Serie** (was man merkt) und ein **echtes Niederschlagsdefizit** über 30 Tage (was Pflanzen und
-Grundwasser merken). Ein Monat mit gelegentlichem Nieselregen, aber weit unter dem Normalwert, ist
-eine Dürre — auch wenn „Tage ohne Regen" auf 0 steht.
-
-Ein Trockentag ist übrigens ein Tag mit **weniger als 1 mm** Niederschlag (ETCCDI-Definition), nicht
-mit exakt 0 mm — sonst würde jeder Taubeschlag die Serie zurücksetzen.
 
 ## Beispiel-Automatisierung
 
