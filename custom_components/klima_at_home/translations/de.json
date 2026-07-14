@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Klima @ Home",
+        "description": "Wähle den Ort, den du beobachten möchtest. Wetter, Temperaturabweichung und Dürre funktionieren weltweit; Grundwasserdaten gibt es nur für Deutschland.",
+        "data": {
+          "name": "Name",
+          "location": "Ort",
+          "station_count": "Anzahl Grundwassermessstellen"
+        },
+        "data_description": {
+          "station_count": "Für wie viele der nächstgelegenen BGR-Messstellen Geräte angelegt werden."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieser Ort ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Klima @ Home",
+        "data": {
+          "station_count": "Anzahl Grundwassermessstellen"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": { "name": "Temperatur" },
+      "humidity": { "name": "Luftfeuchte" },
+      "temperature_anomaly": { "name": "Temperaturabweichung" },
+      "dry_days": { "name": "Tage ohne Regen" },
+      "precipitation_30d_percent": { "name": "Niederschlag 30 Tage" },
+      "precipitation_90d_percent": { "name": "Niederschlag 90 Tage" },
+      "spi_30d": { "name": "SPI 30 Tage" },
+      "spi_90d": { "name": "SPI 90 Tage" },
+      "groundwater_state": {
+        "name": "Einordnung",
+        "state": {
+          "sehr_niedrig": "Sehr niedrig",
+          "niedrig": "Niedrig",
+          "normal": "Normal",
+          "hoch": "Hoch",
+          "sehr_hoch": "Sehr hoch"
+        }
+      },
+      "groundwater_forecast_4w": {
+        "name": "Prognose 4 Wochen",
+        "state": {
+          "sehr_niedrig": "Sehr niedrig",
+          "niedrig": "Niedrig",
+          "normal": "Normal",
+          "hoch": "Hoch",
+          "sehr_hoch": "Sehr hoch"
+        }
+      },
+      "groundwater_trend": {
+        "name": "Trend 4 Wochen",
+        "state": {
+          "stark_fallend": "Stark fallend",
+          "fallend": "Fallend",
+          "gleichbleibend": "Gleichbleibend",
+          "steigend": "Steigend",
+          "stark_steigend": "Stark steigend"
+        }
+      }
+    },
+    "binary_sensor": {
+      "drought": { "name": "Dürre" },
+      "groundwater_critical": { "name": "Kritisch" }
+    }
+  }
+}
