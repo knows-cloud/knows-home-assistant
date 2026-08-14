@@ -89,10 +89,10 @@ emailed. For real email delivery, switch to SMTP on the **Notifications** page.
 | Option | Description |
 | ------ | ----------- |
 | `domain` | Root domain used to seed the initial configuration (first start only) |
-| `log_level` | Log level used to seed the initial configuration (first start only) |
 
-After first start, manage everything through the admin UI — the options above are not
-re-applied to an existing configuration.
+After first start, manage everything through the admin UI — the option above is not
+re-applied to an existing configuration. The log level is set on the **General**
+page of the admin UI.
 
 ## Backups & recovery
 

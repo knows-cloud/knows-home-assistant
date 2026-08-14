@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2
+
+- Removed the misleading `log_level` add-on option: it was only used to seed the
+  very first configuration and silently ignored afterwards. The log level is
+  managed on the **General** page of the admin UI (change + restart Authelia).
+
 ## 1.1.1
 
 - Fixed the image build failing with "can't rename '/tmp/authelia/authelia-linux-…'":

@@ -1,5 +1,5 @@
 name: Better Authelia
-version: 1.1.1
+version: 1.1.2
 slug: better_authelia
 description: Authelia SSO server with a full admin UI for settings, users, access control and branding
 url: https://github.com/knows-cloud/knows-home-assistant
@@ -22,7 +22,5 @@ map:
   - addon_config:rw
 options:
   domain: example.com
-  log_level: info
 schema:
   domain: str
-  log_level: list(debug|info|warn|error)

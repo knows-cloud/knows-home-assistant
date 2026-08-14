@@ -23,7 +23,6 @@ gen_secret session_secret
 gen_secret storage_encryption_key
 
 DOMAIN=$(jq -r '.domain // "example.com"' /data/options.json)
-LOG_LEVEL=$(jq -r '.log_level // "info"' /data/options.json)
 
 if ! bashio::fs.file_exists "${CONFIG}"; then
     bashio::log.info "Creating initial Authelia configuration for domain '${DOMAIN}'"
@@ -35,7 +34,7 @@ server:
   asset_path: /config/assets
 
 log:
-  level: ${LOG_LEVEL}
+  level: info
 
 totp:
   issuer: ${DOMAIN}
