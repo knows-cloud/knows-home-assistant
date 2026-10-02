@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Klima @ Home",
+        "description": "Pick the place you want to track. Weather, climate anomaly and drought work anywhere in the world; groundwater is available for Germany only.",
+        "data": {
+          "name": "Name",
+          "location": "Location",
+          "station_count": "Number of groundwater wells"
+        },
+        "data_description": {
+          "station_count": "How many of the nearest BGR monitoring wells to create devices for."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This location is already set up."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Klima @ Home",
+        "data": {
+          "station_count": "Number of groundwater wells"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "temperature": { "name": "Temperature" },
+      "humidity": { "name": "Humidity" },
+      "temperature_anomaly": { "name": "Temperature anomaly" },
+      "dry_days": { "name": "Days without rain" },
+      "precipitation_30d_percent": { "name": "Precipitation 30 days" },
+      "precipitation_90d_percent": { "name": "Precipitation 90 days" },
+      "spi_30d": { "name": "SPI 30 days" },
+      "spi_90d": { "name": "SPI 90 days" },
+      "groundwater_state": {
+        "name": "Level classification",
+        "state": {
+          "sehr_niedrig": "Very low",
+          "niedrig": "Low",
+          "normal": "Normal",
+          "hoch": "High",
+          "sehr_hoch": "Very high"
+        }
+      },
+      "groundwater_forecast_4w": {
+        "name": "Forecast 4 weeks",
+        "state": {
+          "sehr_niedrig": "Very low",
+          "niedrig": "Low",
+          "normal": "Normal",
+          "hoch": "High",
+          "sehr_hoch": "Very high"
+        }
+      },
+      "groundwater_trend": {
+        "name": "Trend 4 weeks",
+        "state": {
+          "stark_fallend": "Falling sharply",
+          "fallend": "Falling",
+          "gleichbleibend": "Steady",
+          "steigend": "Rising",
+          "stark_steigend": "Rising sharply"
+        }
+      }
+    },
+    "binary_sensor": {
+      "drought": { "name": "Drought" },
+      "groundwater_critical": { "name": "Critical" }
+    }
+  }
+}

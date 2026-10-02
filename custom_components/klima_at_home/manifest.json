@@ -1,0 +1,13 @@
+{
+  "domain": "klima_at_home",
+  "name": "Klima @ Home",
+  "version": "0.1.0",
+  "codeowners": ["@knows-cloud"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/knows-cloud/knows-home-assistant/tree/main/custom_components/klima_at_home",
+  "issue_tracker": "https://github.com/knows-cloud/knows-home-assistant/issues",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "requirements": []
+}
