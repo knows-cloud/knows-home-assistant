@@ -60,6 +60,13 @@ generates a client secret, hashes it into the configuration and shows the
 plaintext **once** — paste it into the app immediately. The page also lists the
 issuer/authorization/token/userinfo URLs apps ask for.
 
+Apps that cannot keep a secret (browser-only dashboards, mobile apps) need a
+**public client**: turn on *Public client (no secret)* and the UI configures
+`token_endpoint_auth_method: none` and mandatory PKCE (S256) for you. For apps
+with a secret you can choose `client_secret_basic` or `client_secret_post` and
+optionally require PKCE. Clients are always set up for the authorization code
+flow; enabling *Stay signed in* also allows the refresh token grant.
+
 If an app logs in fine but doesn't know who the user is (no name/email/roles),
 enable the client's **"Include profile details in the ID token"** compatibility
 toggle — Authelia 4.39 moved those claims to the userinfo endpoint and some

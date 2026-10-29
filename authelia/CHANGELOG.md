@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.3
+
+- Updated Authelia to 4.39.28.
+- SSO clients: new settings for the client authentication method
+  (`client_secret_basic` / `client_secret_post`) and **Require PKCE**.
+  Public clients now always get PKCE (S256) and `token_endpoint_auth_method:
+  none`, so browser apps like the Hermes dashboard can be set up entirely in
+  the UI.
+- SSO clients are now saved with explicit `response_types: [code]` and
+  `grant_types` (`refresh_token` added when *Stay signed in* is on). Re-saving
+  an older client with offline access fixes Authelia's "scopes should only
+  have the values 'offline_access'…" warning.
+
 ## 1.1.2
 
 - Removed the misleading `log_level` add-on option: it was only used to seed the

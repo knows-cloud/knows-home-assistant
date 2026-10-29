@@ -23,6 +23,10 @@ CLIENT_ID_RE = re.compile(r"^[a-zA-Z0-9_.-]{1,100}$")
 OPTIONAL_SCOPES = ["profile", "email", "groups", "offline_access"]
 CONSENT_MODES = ["auto", "explicit", "implicit", "pre-configured"]
 
+# client_secret_jwt needs the secret stored in plaintext and private_key_jwt
+# a per-client JWKS; this UI only stores hashed secrets, so both are left out.
+CONFIDENTIAL_AUTH_METHODS = ["client_secret_basic", "client_secret_post"]
+
 # Claims most apps expected before Authelia 4.39 moved them out of the ID
 # token; offered as a per-client compatibility toggle.
 LEGACY_ID_TOKEN_CLAIMS = ["email", "email_verified", "name",
@@ -102,6 +106,12 @@ def _client_from_form(form, existing=None):
     scopes = ["openid"] + [s for s in OPTIONAL_SCOPES if form.get(f"scope_{s}")]
     client["scopes"] = scopes
 
+    # The UI only sets up the authorization code flow. offline_access is only
+    # valid with it and needs the refresh_token grant to be of any use.
+    client["response_types"] = ["code"]
+    client["grant_types"] = ["authorization_code"] + (
+        ["refresh_token"] if "offline_access" in scopes else [])
+
     policy = form.get("authorization_policy", "one_factor")
     if policy in ("one_factor", "two_factor"):
         client["authorization_policy"] = policy
@@ -120,15 +130,28 @@ def _client_from_form(form, existing=None):
         client["public"] = True
         client["token_endpoint_auth_method"] = "none"
         client.pop("client_secret", None)
+        # Without a secret, PKCE is the only thing protecting the code.
+        require_pkce = True
     else:
         client.pop("public", None)
-        client["token_endpoint_auth_method"] = "client_secret_basic"
+        auth_method = form.get("token_endpoint_auth_method", "")
+        client["token_endpoint_auth_method"] = (
+            auth_method if auth_method in CONFIDENTIAL_AUTH_METHODS
+            else "client_secret_basic")
         if not client.get("client_secret"):
             secret = random_token(64)
             try:
                 client["client_secret"] = hash_client_secret(secret)
             except Exception as exc:  # noqa: BLE001
                 return None, None, f"Could not hash the client secret: {exc}"
+        require_pkce = bool(form.get("require_pkce"))
+
+    if require_pkce:
+        client["require_pkce"] = True
+        client["pkce_challenge_method"] = "S256"
+    else:
+        client.pop("require_pkce", None)
+        client.pop("pkce_challenge_method", None)
 
     if form.get("legacy_claims"):
         client["claims_policy"] = "legacy"
@@ -190,7 +213,8 @@ def new_client():
 
     return render_template("oidc_client.html", client=None,
                            optional_scopes=OPTIONAL_SCOPES,
-                           consent_modes=CONSENT_MODES)
+                           consent_modes=CONSENT_MODES,
+                           auth_methods=CONFIDENTIAL_AUTH_METHODS)
 
 
 @bp.route("/oidc/clients/<client_id>/edit", methods=["GET", "POST"])
@@ -220,7 +244,8 @@ def edit_client(client_id):
 
     return render_template("oidc_client.html", client=client,
                            optional_scopes=OPTIONAL_SCOPES,
-                           consent_modes=CONSENT_MODES)
+                           consent_modes=CONSENT_MODES,
+                           auth_methods=CONFIDENTIAL_AUTH_METHODS)
 
 
 @bp.route("/oidc/clients/<client_id>/secret", methods=["POST"])
