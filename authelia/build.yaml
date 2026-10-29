@@ -7,4 +7,4 @@ labels:
   org.opencontainers.image.description: Authelia with an admin UI for Home Assistant
   org.opencontainers.image.source: https://github.com/knows-cloud/knows-home-assistant
 args:
-  AUTHELIA_VERSION: 4.39.20
+  AUTHELIA_VERSION: 4.39.28

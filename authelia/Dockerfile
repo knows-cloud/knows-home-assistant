@@ -2,7 +2,7 @@ ARG BUILD_FROM
 FROM ${BUILD_FROM}
 
 ARG BUILD_ARCH
-ARG AUTHELIA_VERSION=4.39.20
+ARG AUTHELIA_VERSION=4.39.28
 
 # Runtime dependencies: Authelia binary + Python for the admin UI
 RUN apk add --no-cache \
