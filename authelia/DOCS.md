@@ -67,6 +67,15 @@ with a secret you can choose `client_secret_basic` or `client_secret_post` and
 optionally require PKCE. Clients are always set up for the authorization code
 flow; enabling *Stay signed in* also allows the refresh token grant.
 
+*Stay signed in for* sets how long such an app may keep refreshing its login
+(e.g. `30d`). Left empty, Authelia's default of 90 minutes applies: an app
+that has been idle for longer than that (a phone app overnight, say) must log
+in again. The setting is stored as a custom lifespan named after the client
+(`identity_providers.oidc.lifespans.custom.<client_id>.refresh_token`, with
+`lifespan: <client_id>` on the client); further lifespan keys you add there in
+the raw editor are kept. The session settings (*Remember me* and so on) only
+cover the login portal itself, not these app logins.
+
 If an app logs in fine but doesn't know who the user is (no name/email/roles),
 enable the client's **"Include profile details in the ID token"** compatibility
 toggle — Authelia 4.39 moved those claims to the userinfo endpoint and some

@@ -32,6 +32,9 @@ CONFIDENTIAL_AUTH_METHODS = ["client_secret_basic", "client_secret_post"]
 LEGACY_ID_TOKEN_CLAIMS = ["email", "email_verified", "name",
                           "preferred_username", "groups"]
 
+# Authelia duration strings such as "90m", "30d" or "1d12h".
+DURATION_RE = re.compile(r"^(\d+\s*(ms|s|m|h|d|w|M|y)\s*)+$")
+
 
 def _oidc(config):
     return dig(config, "identity_providers", "oidc")
@@ -161,6 +164,84 @@ def _client_from_form(form, existing=None):
     return client, secret, None
 
 
+def _custom_lifespans(config):
+    custom = dig(config, "identity_providers", "oidc", "lifespans", "custom")
+    return custom if isinstance(custom, dict) else {}
+
+
+def _refresh_lifespan(config, client):
+    """The refresh token lifespan of the client's named custom lifespan, or ''."""
+    entry = _custom_lifespans(config).get(client.get("lifespan") or "")
+    if isinstance(entry, dict):
+        return str(entry.get("refresh_token", "") or "")
+    return ""
+
+
+def _drop_empty_lifespans(config):
+    oidc = _oidc(config) or {}
+    lifespans = oidc.get("lifespans")
+    if not isinstance(lifespans, dict):
+        return
+    if isinstance(lifespans.get("custom"), dict) and not lifespans["custom"]:
+        lifespans.pop("custom")
+    if not lifespans:
+        oidc.pop("lifespans")
+
+
+def _apply_refresh_lifespan(config, client, value):
+    """Store *value* as the refresh token lifespan of *client*.
+
+    Authelia only applies per-client lifespans through a named entry under
+    ``lifespans.custom`` that the client references with ``lifespan``. The UI
+    names that entry after the client. Other keys someone added to the entry
+    in the raw editor are kept; an entry shared with another client is copied
+    first so changing one client never changes another.
+    """
+    client_id = client["client_id"]
+    name = client.get("lifespan") or client_id
+    custom = _custom_lifespans(config)
+    entry = custom.get(name)
+    entry = dict(entry) if isinstance(entry, dict) else {}
+    shared = any(isinstance(c, dict) and c is not client
+                 and c.get("lifespan") == name for c in _clients(config))
+    if shared:
+        name = client_id
+
+    if value:
+        entry["refresh_token"] = value
+    else:
+        entry.pop("refresh_token", None)
+
+    if entry:
+        custom[name] = entry
+        setpath(config, "identity_providers", "oidc", "lifespans", "custom",
+                value=custom)
+        client["lifespan"] = name
+    else:
+        if not shared:
+            custom.pop(name, None)
+        client.pop("lifespan", None)
+    _drop_empty_lifespans(config)
+
+
+def _forget_lifespan(config, client_id):
+    """Drop the custom lifespan named after a deleted client if unused."""
+    if any(isinstance(c, dict) and c.get("lifespan") == client_id
+           for c in _clients(config)):
+        return
+    _custom_lifespans(config).pop(client_id, None)
+    _drop_empty_lifespans(config)
+
+
+def _lifespan_from_form(form):
+    """Returns (value, error_or_None)."""
+    value = form.get("refresh_token_lifespan", "").strip()
+    if value and not DURATION_RE.match(value):
+        return None, ("Invalid duration for “Stay signed in for”. Use a "
+                      "number with a unit, e.g. 90m, 12h, 7d or 1M.")
+    return value, None
+
+
 def _ensure_legacy_policy(config):
     clients = _clients(config)
     uses_legacy = any(c.get("claims_policy") == "legacy" for c in clients
@@ -193,7 +274,9 @@ def new_client():
             flash(f"A client named '{client_id}' already exists.", "error")
             return redirect(url_for("oidc.new_client"))
 
-        client, secret, error = _client_from_form(request.form)
+        lifespan, error = _lifespan_from_form(request.form)
+        if not error:
+            client, secret, error = _client_from_form(request.form)
         if error:
             flash(error, "error")
             return redirect(url_for("oidc.new_client"))
@@ -203,6 +286,7 @@ def new_client():
         clients.append(client)
         setpath(config, "identity_providers", "oidc", "clients",
                 value=clients)
+        _apply_refresh_lifespan(config, client, lifespan)
         _ensure_legacy_policy(config)
         save_config(config)
         if secret:
@@ -212,6 +296,7 @@ def new_client():
         return redirect(url_for("oidc.index"))
 
     return render_template("oidc_client.html", client=None,
+                           refresh_lifespan="",
                            optional_scopes=OPTIONAL_SCOPES,
                            consent_modes=CONSENT_MODES,
                            auth_methods=CONFIDENTIAL_AUTH_METHODS)
@@ -226,14 +311,17 @@ def edit_client(client_id):
         return redirect(url_for("oidc.index"))
 
     if request.method == "POST":
-        updated, secret, error = _client_from_form(request.form,
-                                                   existing=client)
+        lifespan, error = _lifespan_from_form(request.form)
+        if not error:
+            updated, secret, error = _client_from_form(request.form,
+                                                       existing=client)
         if error:
             flash(error, "error")
             return redirect(url_for("oidc.edit_client",
                                     client_id=client_id))
         client.clear()
         client.update(updated)
+        _apply_refresh_lifespan(config, client, lifespan)
         _ensure_legacy_policy(config)
         save_config(config)
         if secret:
@@ -243,6 +331,7 @@ def edit_client(client_id):
         return redirect(url_for("oidc.index"))
 
     return render_template("oidc_client.html", client=client,
+                           refresh_lifespan=_refresh_lifespan(config, client),
                            optional_scopes=OPTIONAL_SCOPES,
                            consent_modes=CONSENT_MODES,
                            auth_methods=CONFIDENTIAL_AUTH_METHODS)
@@ -282,6 +371,7 @@ def delete_client(client_id):
         flash(f"Unknown client '{client_id}'.", "error")
         return redirect(url_for("oidc.index"))
     setpath(config, "identity_providers", "oidc", "clients", value=remaining)
+    _forget_lifespan(config, client_id)
     _ensure_legacy_policy(config)
     save_config(config)
     flash(f"Client '{client_id}' deleted. Restart Authelia to apply.",

@@ -43,6 +43,9 @@
      'groups' in client.scopes if editing else True) }}
   {{ toggle('scope_offline_access', 'Stay signed in (offline access)', 'Allows the app to refresh the login in the background without asking the user again. Only needed by a few apps.',
      'offline_access' in client.scopes if editing else False) }}
+  {{ text_field('refresh_token_lifespan', 'Stay signed in for',
+     'How long the app can keep refreshing the login without asking again, e.g. "30d". Each refresh issues a new refresh token. Only used when "Stay signed in" is on. Leave empty for Authelia\'s default of 90 minutes, which ends the login once the app has been idle for longer than that.',
+     value=refresh_lifespan, placeholder='90m') }}
 {% endcall %}
 
 {% call card('Compatibility') %}

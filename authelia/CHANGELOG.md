@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.4
+
+- SSO clients: new setting **Stay signed in for**, the refresh token lifespan
+  of the client. Without it Authelia's default of 90 minutes applies, so apps
+  that stay idle longer (e.g. a phone app overnight) had to log in again even
+  with long *Remember me* session settings. Stored as a custom lifespan named
+  after the client; deleting the client removes it again.
+
 ## 1.1.3
 
 - Updated Authelia to 4.39.28.
